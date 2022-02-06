@@ -12,7 +12,7 @@ class Users extends Component {
     const response = await axios.get("https://reqres.in/api/users");
     setTimeout(() => {
       this.setState({ users: response.data.data, isLoading: false });
-    }, 3000);
+    }, 1000);
   }
 
   render() {
@@ -25,7 +25,7 @@ class Users extends Component {
           {this.state.isLoading ? (
             <LoadingUsers />
           ) : (
-            this.state.users.map((user , index) => {
+            this.state.users.map((user, index) => {
               return (
                 <div className="col-4 text-center p-5" key={index}>
                   <img
@@ -40,13 +40,17 @@ class Users extends Component {
                   <div className="row">
                     <div className="col-6">
                       <button
-                        onClick={this.handleUpdate}
+                        onClick={() => {
+                          this.handleUpdate(user);
+                        }}
                         className="btn btn-info btn-sm"
                       >
                         update
                       </button>
                       <button
-                        onClick={this.handleDelete}
+                        onClick={() => {
+                          this.handleDelete(user);
+                        }}
                         className="btn btn-danger btn-sm"
                       >
                         delete
@@ -61,9 +65,34 @@ class Users extends Component {
       </>
     );
   }
-  handleCreate = () => {};
-  handleUpdate = (userId) => {};
-  handleDelete = (userId) => {};
+  handleCreate = async () => {
+    const newUser = {
+      first_name: "ahmad",
+      last_name: "mohammadi",
+      email: "ahmad@gmail.com",
+      avatar: "https://reqres.in/img/faces/2-image.jpg",
+    };
+    const response = await axios.post("https://reqres.in/api/users", newUser);
+    this.setState({ users: [...this.state.users, newUser] });
+  };
+  handleUpdate = async (user) => {
+    user.first_name = "updated";
+    const response = await axios.put(
+      `https://reqres.in/api/users/${user.id}`,
+      user
+    );
+    const updateUsers = [...this.state.users];
+    const index = updateUsers.indexOf(user);
+    updateUsers[index] = { ...user };
+    this.setState({ users: updateUsers });
+  };
+  handleDelete = async (user) => {
+    const response = await axios.delete(
+      `https://reqres.in/api/users/${user.id}`
+    );
+    const newUser = this.state.users.filter((u) => u.id !== user.id);
+    this.setState({ users: newUser });
+  };
 }
 
 export default Users;
